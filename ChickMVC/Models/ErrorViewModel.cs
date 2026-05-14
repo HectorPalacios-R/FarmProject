@@ -1,4 +1,4 @@
-namespace ChickenMVC.Models
+namespace ChickMVC.Models
 {
     public class ErrorViewModel
     {

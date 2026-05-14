@@ -1,8 +1,8 @@
-using ChickenMVC.Models;
+using ChickMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace ChickenMVC.Controllers
+namespace ChickMVC.Controllers
 {
     public class HomeController : Controller
     {

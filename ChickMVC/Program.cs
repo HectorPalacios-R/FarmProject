@@ -1,4 +1,4 @@
-namespace ChickenMVC
+namespace ChickMVC
 {
     public class Program
     {

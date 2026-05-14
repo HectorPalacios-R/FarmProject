@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ChickenAPI/ChickenAPI.csproj" />
+  <Project Path="ChickenMVC/ChickenMVC.csproj" />
+</Solution>

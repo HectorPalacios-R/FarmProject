@@ -12,13 +12,17 @@ namespace ChickenAPI
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddEndpointsApiExplorer(); // Required for Minimal APIs or routing discovery
+            builder.Services.AddSwaggerGen();           // Registers the Swagger generator
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (true)
             {
                 app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI(); // Serves the interactive web UI
             }
 
             app.UseHttpsRedirection();

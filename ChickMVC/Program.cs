@@ -8,7 +8,7 @@ namespace ChickMVC
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-
+            builder.Services.AddHttpClient();//added this to allow us to call the API from the MVC app
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

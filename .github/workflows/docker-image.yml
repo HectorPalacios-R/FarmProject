@@ -133,12 +133,12 @@ jobs:
           echo "$MVC_RESPONSE"
           echo "========================================="
 
-          echo "Checking if Cluck Norris exists in MVC output..."
+          echo "Checking if Jeffy exists in MVC output..."
 
-          if echo "$MVC_RESPONSE" | grep -q "Cluck Norris"; then
-            echo "Success: MVC interface successfully rendered the expected chicken!"
+          if echo "$MVC_RESPONSE" | grep -q "Jeffy"; then
+            echo "Success: MVC interface successfully rendered chicken data!"
           else
-            echo "Error: MVC interface failed to render the expected chicken."
+            echo "Error: MVC interface failed to render chicken data."
             exit 1
           fi
 

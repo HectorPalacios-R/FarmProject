@@ -103,7 +103,7 @@ jobs:
         run: |
           echo "Posting a new chicken payload to the database..."
 
-          curl -X POST http://localhost:8080/api/chickens \
+          curl -X POST http://localhost:8080/api/Chicken \
             -H "Content-Type: application/json" \
             -d '{"name":"Cluck Norris","age":2,"breed":"Rhode Island Red","eggProduction":0.7,"isPregnant":false,"lastVetCheck":"2024-04-15T00:00:00Z"}' \
             --fail --verbose

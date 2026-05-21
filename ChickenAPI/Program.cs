@@ -21,6 +21,14 @@ namespace ChickenAPI
 
             var app = builder.Build();
 
+            // Automatically create database/tables if they do not exist
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<FarmDbContext>();
+
+                db.Database.EnsureCreated();
+            }
+
             // Configure the HTTP request pipeline.
             app.MapOpenApi();
 

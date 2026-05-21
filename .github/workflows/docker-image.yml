@@ -1,4 +1,4 @@
-ame: Advanced CI/CD Integration Pipeline
+name: Advanced CI/CD Integration Pipeline
 
 on:
   push:

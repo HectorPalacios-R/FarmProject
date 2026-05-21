@@ -3,43 +3,62 @@ services:
     build:
       context: .
       dockerfile: ./ChickDB/Dockerfile
+
     container_name: chick-db
+
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "Password1!"
       MSSQL_PID: "Express"
+
     ports:
       - "1433:1433"
-      - "1400:1433"  # Secondary port to avoid local SQL conflicts
+      - "1400:1433"
+
     volumes:
       - db_data:/var/opt/mssql
       - ./logs:/var/opt/mssql/log
+
     restart: unless-stopped
+
     networks:
       - chick-network
+
   mvc-service:
     build:
-      context: .               # Root context to ensure file accessibility
-      dockerfile: ./ChickMVC/Dockerfile  # Path to MVC Dockerfile
+      context: .
+      dockerfile: ./ChickMVC/Dockerfile
+
     container_name: mvc-chick-service-magic
+
     environment:
-      SQL_CONNECTION_STRING: "Server=chick-db-service;Database=Farm;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;user id=sa;password=Password1!"
+      ConnectionStrings__DefaultConnection: "Server=chick-db-service;Database=Farm;User Id=sa;Password=Password1!;TrustServerCertificate=True;Encrypt=False"
+
     ports:
       - "80:8080"
+
+    depends_on:
+      - chick-db-service
+
     networks:
-      - chick-network 
+      - chick-network
 
   api-service:
     build:
       context: .
       dockerfile: ./ChickenAPI/Dockerfile
+
     container_name: api-chick-service
+
     environment:
-       SQL_CONNECTION_STRING: "Server=chick-db-service;Database=Farm;Trusted_Connection=false;MultipleActiveResultSets=true;Encrypt=false;user id=sa;password=Password1!"
+      ConnectionStrings__DefaultConnection: "Server=chick-db-service;Database=Farm;User Id=sa;Password=Password1!;TrustServerCertificate=True;Encrypt=False"
+
     ports:
       - "8080:8080"
+
     depends_on:
       - chick-db-service
+
     networks:
       - chick-network
 

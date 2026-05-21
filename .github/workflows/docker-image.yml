@@ -3,6 +3,7 @@ name: Advanced CI/CD Integration Pipeline
 on:
   push:
     branches: [ "main", "master" ]
+
   pull_request:
     branches: [ "main", "master" ]
 
@@ -14,7 +15,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  # JOB 1: Validates code layout, syntax formatting, and compilation rules early
+
+  # JOB 1: Validates formatting and compilation rules
   code-quality:
     name: 🛡️ Code Quality & Formatting
     runs-on: ubuntu-latest
@@ -30,18 +32,21 @@ jobs:
           cache: true
           cache-dependency-path: '**/*.csproj'
 
-      # FIX: Executable steps that use the configured cache layout to validate syntax stability
+      - name: Restore Dependencies
+        run: dotnet restore
+
       - name: Verify Code Formatting
         run: dotnet format --verify-no-changes --severity warn
 
       - name: Static Code Analysis
         run: dotnet build --configuration Release /warnaserror
 
-  # JOB 2: Compiles the source files inside target Docker configurations
+  # JOB 2: Build Docker containers
   compile-and-build:
     name: 🐳 Docker Build & Package
     runs-on: ubuntu-latest
     needs: code-quality
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -56,72 +61,89 @@ jobs:
       - name: Build Application Containers
         run: docker compose build
 
-  # JOB 3: Spins up container layout and evaluates cross-dependency integrations
+  # JOB 3: Integration Testing
   integration-testing:
     name: 🧪 System Integration Verification
     runs-on: ubuntu-latest
-    needs: compile-and-build # Only starts after Docker builds successfully finalize
+    needs: compile-and-build
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
-        cache: true
-        cache-dependency-path: '**/*.csproj'
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: '**/*.csproj'
 
-    - name: Build and Launch Application Mesh
-      run: docker compose up --build -d
+      - name: Build and Launch Application Mesh
+        run: docker compose up --build -d
 
-    - name: Grace Period for Database Boot
-      run: |
-        echo "Giving Microsoft SQL Server 25 seconds to complete table setups..."
-        sleep 25
-      
-    - name: Wait for API Readiness
-      run: |
-          echo "Waiting for ChickenAPI to wake up at http://localhost:5231..."
-          timeout 120s sh -c 'until curl -sSf http://localhost:5231/swagger/index.html > /dev/null; do sleep 2; done'
+      - name: Grace Period for Database Boot
+        run: |
+          echo "Giving SQL Server time to initialize..."
+          sleep 25
+
+      - name: Wait for API Readiness
+        run: |
+          echo "Waiting for ChickenAPI to wake up at http://localhost:8080..."
+
+          timeout 120s sh -c '
+            until curl -sSf http://localhost:8080/swagger/index.html > /dev/null
+            do
+              sleep 2
+            done
+          '
+
           echo "ChickenAPI is up and running!"
-    - name: Integration Step 1 - Seed Data via API
-      run: |
+
+      - name: Integration Step 1 - Seed Data via API
+        run: |
           echo "Posting a new chicken payload to the database..."
-          curl -X POST http://localhost:5231/api/chickens \
+
+          curl -X POST http://localhost:8080/api/chickens \
             -H "Content-Type: application/json" \
             -d '{"name":"Cluck Norris","age":2,"breed":"Rhode Island Red","eggProduction":0.7,"isPregnant":false,"lastVetCheck":"2024-04-15T00:00:00Z"}' \
             --fail --verbose
 
-    - name: Integration Step 2 - Verify Front-End MVC Data Rendering
-      run: |
-          echo "Querying the MVC web application on port 5178..."
-          MVC_RESPONSE=$(curl -s http://localhost:5178)
+      - name: Integration Step 2 - Verify Front-End MVC Data Rendering
+        run: |
+          echo "Querying the MVC web application on port 80..."
+
+          MVC_RESPONSE=$(curl -s http://localhost:80)
 
           echo "Asserting that the MVC response contains the expected chicken name..."
+
           if echo "$MVC_RESPONSE" | grep -q "Cluck Norris"; then
             echo "Success: MVC interface successfully rendered the expected chicken!"
           else
             echo "Error: MVC interface failed to render the expected chicken."
             exit 1
           fi
-    - name: Tear Down Mesh and Logs
-      if: always()
-      run: |
-        docker compose logs chickenapi > api-container-debug.log
-        docker compose logs chicken-db-service > click-db-container-debug.log
-        docker compose logs chickenmvc > mvc-container-debug.log
-        docker compose down --volumes
 
-  # JOB 4: (Optional) Pushes the validated Docker images to a registry for deployment
+      - name: Tear Down Mesh and Logs
+        if: always()
+        run: |
+          docker compose logs api-service > api-container-debug.log
+          docker compose logs chick-db-service > db-container-debug.log
+          docker compose logs mvc-service > mvc-container-debug.log
+
+          docker compose down --volumes
+
+  # JOB 4: Deployment Stage
   cd-deployment:
     name: 🚀 Production Cloud Deployment
     runs-on: ubuntu-latest
     needs: integration-testing
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' # Only deploy on main/master branches
+
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
     environment: Production
+
     steps:
-      - name: Execute Server Infrastructure sync
+      - name: Execute Server Infrastructure Sync
         run: |
-          echo "All automated checks passed! Initiating production Handshake..."
+          echo "All automated checks passed!"
+          echo "Initiating production deployment handshake..."

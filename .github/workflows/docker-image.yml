@@ -2,10 +2,10 @@ name: Advanced CI/CD Integration Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
 
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,9 +16,8 @@ env:
 
 jobs:
 
-  # JOB 1: Validates formatting and compilation rules
   code-quality:
-    name: 🛡️ Code Quality & Formatting
+    name: Code Quality and Formatting
     runs-on: ubuntu-latest
 
     steps:
@@ -41,9 +40,8 @@ jobs:
       - name: Static Code Analysis
         run: dotnet build --configuration Release /warnaserror
 
-  # JOB 2: Build Docker containers
   compile-and-build:
-    name: 🐳 Docker Build & Package
+    name: Docker Build and Package
     runs-on: ubuntu-latest
     needs: code-quality
 
@@ -61,9 +59,8 @@ jobs:
       - name: Build Application Containers
         run: docker compose build
 
-  # JOB 3: Integration Testing
   integration-testing:
-    name: 🧪 System Integration Verification
+    name: System Integration Verification
     runs-on: ubuntu-latest
     needs: compile-and-build
 
@@ -84,7 +81,7 @@ jobs:
       - name: Grace Period for Database Boot
         run: |
           echo "Giving SQL Server time to initialize..."
-          sleep 25
+          sleep 45
 
       - name: Wait for API Readiness
         run: |
@@ -132,9 +129,8 @@ jobs:
 
           docker compose down --volumes
 
-  # JOB 4: Deployment Stage
   cd-deployment:
-    name: 🚀 Production Cloud Deployment
+    name: Production Cloud Deployment
     runs-on: ubuntu-latest
     needs: integration-testing
 

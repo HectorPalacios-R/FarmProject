@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 name: Advanced CI/CD Integration Pipeline
 
 on:
@@ -130,23 +129,3 @@ integration-testing:
     - name: Execute Server Infrastructure Sync
       run: |
         echo "All automated tests passed cleanly. Initiating production handshake scripts"
-=======
-name: Docker Image CI
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-jobs:
-
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
->>>>>>> 9020d5f13821a94ed95ff34e0fd29d63ed4cc5f9

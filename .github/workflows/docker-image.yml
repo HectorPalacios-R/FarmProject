@@ -96,6 +96,13 @@ jobs:
 
           echo "ChickenAPI is up and running!"
 
+      # DEBUGGING STEP
+      - name: Debug API Container Logs
+        run: docker compose logs api-service
+
+      - name: Debug Database Container Logs
+        run: docker compose logs chick-db-service
+
       - name: Integration Step 1 - Seed Data via API
         run: |
           echo "Posting a new chicken payload to the database..."

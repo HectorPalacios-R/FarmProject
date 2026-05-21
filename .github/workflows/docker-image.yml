@@ -129,7 +129,11 @@ jobs:
 
           MVC_RESPONSE=$(curl -s http://localhost:80)
 
-          echo "Asserting that the MVC response contains the expected chicken name..."
+          echo "=========== MVC PAGE RESPONSE ==========="
+          echo "$MVC_RESPONSE"
+          echo "========================================="
+
+          echo "Checking if Cluck Norris exists in MVC output..."
 
           if echo "$MVC_RESPONSE" | grep -q "Cluck Norris"; then
             echo "Success: MVC interface successfully rendered the expected chicken!"
